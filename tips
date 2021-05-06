@@ -1,0 +1,8 @@
+ROS
+
+color float32
+point pos orient... float 64
+
+C++
+double = float64
+float = float32
