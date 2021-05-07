@@ -8,4 +8,7 @@ set(SOURCE_FILE lriovis.cpp lriovis.hpp)
 add_library(visualization ${SOURCE_FILE})
 
 find_package(OpenCV 3.4.14 REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
+find_package(Eigen3 REQUIRED)
+
+include_directories(${OpenCV_INCLUDE_DIRS}
+                    ${Eigen3_INCLUDE_DIRS})
