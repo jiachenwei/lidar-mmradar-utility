@@ -94,5 +94,3 @@ int main() {
 
     return 0;
 }
-
-// g++ -o test test.cpp `pkg-config opencv --cflags --libs`
