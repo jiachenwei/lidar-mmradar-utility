@@ -8,8 +8,8 @@ using namespace std;
 int main() {
     Mat src;
     const int pixels_per_meter = 18;
-    Point2i pixel_drawing_origin = initialize_display_canvas(
-        src, 24, 55, Point2d(12, 3), pixels_per_meter);
+    Point2i pixel_drawing_origin =
+        initialize_display_canvas(src, 24, 55, 12, 3, pixels_per_meter);
 
     draw_one_lidar_objects_bounding_box(
         &src, Point3d(6, 32, 4), Point3d(1.9, 4.9, 2),

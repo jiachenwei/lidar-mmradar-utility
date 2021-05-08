@@ -1,13 +1,25 @@
+/**
+ * @file lriovis.hpp
+ * @author Chenwei Jia (cwjia98@gmail.com)
+ * @brief lrio的可视化模块头文件
+ * @version 0.1
+ * @date 2021-05-08
+ *
+ * @copyright Copyright (c) 2021
+ *
+ */
+
 #include <cmath>
 #include <eigen3/Eigen/Dense>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-cv::Point2i initialize_display_canvas(
-    cv::Mat& src, const double& real_width = 24, const double& real_length = 52,
-    const cv::Point2i& real_origin = cv::Point2f(12, 0),
-    const int& pixels_per_meter = 18);
+cv::Point2i initialize_display_canvas(cv::Mat& src, const double& real_x,
+                                      const double& real_y,
+                                      const double& real_origin_x,
+                                      const double& real_origin_y,
+                                      const int& pixels_per_meter);
 
 cv::Point2i draw_one_mmradar_object(
     cv::Mat* const src, const cv::Point2d& real_obj_pos,

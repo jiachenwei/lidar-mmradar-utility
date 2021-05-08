@@ -1,20 +1,44 @@
+/**
+ * @file lriovis.cpp
+ * @author Chenwei Jia (cwjia98@gmail.com)
+ * @brief
+ * @version 0.1
+ * @date 2021-05-08
+ *
+ * @copyright Copyright (c) 2021
+ *
+ */
+
 #include "lriovis.hpp"
 
 using namespace cv;
 
-Point2i initialize_display_canvas(Mat& src, const double& real_width,
-                                  const double& real_length,
-                                  const Point2i& real_origin,
+Point2i initialize_display_canvas(Mat& src, const double& real_x,
+                                  const double& real_y,
+                                  const double& real_origin_x,
+                                  const double& real_origin_y,
                                   const int& pixels_per_meter) {
+    /**
+     * @brief 初始化画布
+     * @param src 引用类型用于存储画布
+     * @param real_x x轴向的画布总长度起点
+     * @param real_y y轴向的画布总长度
+     * @param real_origin 画布的起点
+     * @param pixels_per_meter 每米几个像素
+     * @return 画布绘制中心的像素坐标
+     *
+     */
+
+    const Point2i _real_origin(real_origin_x, real_origin_y);
     // 画布宽度，单位：像素
-    const int pixel_canvas_width = std::round(real_width * pixels_per_meter);
+    const int pixel_canvas_width = std::round(real_x * pixels_per_meter);
     // 画布高度，单位：像素
-    const int pixel_canvas_height = std::round(real_length * pixels_per_meter);
+    const int pixel_canvas_height = std::round(real_y * pixels_per_meter);
 
     // 绘图中心点, wh, xy
     Point2i pixel_drawing_origin(
-        std::round(real_origin.x * pixels_per_meter),
-        std::round(pixel_canvas_height - real_origin.y * pixels_per_meter));
+        std::round(_real_origin.x * pixels_per_meter),
+        std::round(pixel_canvas_height - _real_origin.y * pixels_per_meter));
 
     // 创建初始画布
     src = Mat::zeros(Size(pixel_canvas_width, pixel_canvas_height), CV_32FC3);
@@ -24,9 +48,9 @@ Point2i initialize_display_canvas(Mat& src, const double& real_width,
 
     // 绘制距离同心圆与数字
     int real_circle_interval_distance = 10;  // 真实同心圆间隔距离,单位：m
-    int pixel_circle_interval_distance = std::round(
-        (double(real_circle_interval_distance) / double(real_length)) *
-        pixel_canvas_height);  // 画布中同心圆间隔距离，单位：像素
+    int pixel_circle_interval_distance =
+        std::round((double(real_circle_interval_distance) / double(real_y)) *
+                   pixel_canvas_height);  // 画布中同心圆间隔距离，单位：像素
 
     int baseline = 0;
     int thickness = 1;
@@ -48,7 +72,7 @@ Point2i initialize_display_canvas(Mat& src, const double& real_width,
     putText(src, "5m", text_org, FONT_HERSHEY_SIMPLEX, 0.6, bg_guide_line_color,
             thickness);
 
-    for (int i = 1; i <= std::round((real_length - real_origin.y) /
+    for (int i = 1; i <= std::round((real_y - _real_origin.y) /
                                     real_circle_interval_distance);
          i++) {
         circle(src, pixel_drawing_origin, (i * pixel_circle_interval_distance),
