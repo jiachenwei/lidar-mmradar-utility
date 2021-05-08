@@ -117,13 +117,31 @@ Point2i draw_one_mmradar_object(Mat* const src, const Point2d& real_obj_pos,
     return pixel_drawing_origin + pixel_obj_point;
 }
 
-void rot_matrix_mul_point(const Mat& rot_mat, Point3d& p) {
-    p.x = rot_mat.at<double>(0, 0) * p.x + rot_mat.at<double>(0, 1) * p.y +
-          rot_mat.at<double>(0, 2) * p.z;
-    p.y = rot_mat.at<double>(1, 0) * p.x + rot_mat.at<double>(1, 1) * p.y +
-          rot_mat.at<double>(1, 2) * p.z;
-    p.z = rot_mat.at<double>(2, 0) * p.x + rot_mat.at<double>(2, 1) * p.y +
-          rot_mat.at<double>(2, 2) * p.z;
+Eigen::Matrix3d quat_to_rot_mat(const double& w, const double& x,
+                                const double& y, const double& z) {
+    Eigen::Quaterniond q;
+    q.w() = w;
+    q.x() = x;
+    q.y() = y;
+    q.z() = z;
+    return q.normalized().toRotationMatrix();
+}
+
+Eigen::Matrix3d quat_to_rot_mat(const Scalar& quat) {
+    Eigen::Quaterniond q;
+    q.w() = quat[0];
+    q.x() = quat[1];
+    q.y() = quat[2];
+    q.z() = quat[3];
+    return q.normalized().toRotationMatrix();
+}
+
+void rot_mat_mul_point(const Eigen::Matrix3d& rot_mat, Point3d& p) {
+    Eigen::Vector3d pos(p.x, p.y, p.z);
+    pos = rot_mat * pos;
+    p.x = pos.x();
+    p.y = pos.y();
+    p.z = pos.z();
 }
 
 Point2i draw_one_lidar_objects_bounding_box(
@@ -160,25 +178,16 @@ Point2i draw_one_lidar_objects_bounding_box(
     Point3d real_right_rear__btm(+real_obj_size.x / 2, -real_obj_size.y / 2,
                                  -real_obj_size.z / 2);
 
-    const Scalar& q = quat;
+    Eigen::Matrix3d rot_mat = quat_to_rot_mat(quat);
 
-    Mat rot_mat =
-        (Mat_<double>(3, 3) << (1 - 2 * (pow(q[2], 2) + pow(q[3], 2))),
-         (2 * (q[1] * q[2] - q[0] * q[3])), (2 * (q[1] * q[3] + q[0] * q[2])),
-         (2 * (q[1] * q[2] + q[0] * q[3])),
-         (1 - 2 * (pow(q[1], 2) + pow(q[3], 2))),
-         (2 * (q[2] * q[3] - q[0] * q[1])), (2 * (q[1] * q[3] - q[0] * q[2])),
-         (2 * (q[2] * q[3] + q[0] * q[1])),
-         (1 - 2 * (pow(q[1], 2) + pow(q[2], 2))));
-
-    rot_matrix_mul_point(rot_mat, real_left__front_top);
-    rot_matrix_mul_point(rot_mat, real_left__rear__top);
-    rot_matrix_mul_point(rot_mat, real_right_front_top);
-    rot_matrix_mul_point(rot_mat, real_right_rear__top);
-    rot_matrix_mul_point(rot_mat, real_left__front_btm);
-    rot_matrix_mul_point(rot_mat, real_left__rear__btm);
-    rot_matrix_mul_point(rot_mat, real_right_front_btm);
-    rot_matrix_mul_point(rot_mat, real_right_rear__btm);
+    rot_mat_mul_point(rot_mat, real_left__front_top);
+    rot_mat_mul_point(rot_mat, real_left__rear__top);
+    rot_mat_mul_point(rot_mat, real_right_front_top);
+    rot_mat_mul_point(rot_mat, real_right_rear__top);
+    rot_mat_mul_point(rot_mat, real_left__front_btm);
+    rot_mat_mul_point(rot_mat, real_left__rear__btm);
+    rot_mat_mul_point(rot_mat, real_right_front_btm);
+    rot_mat_mul_point(rot_mat, real_right_rear__btm);
 
     const double& ppm = pixels_per_meter;
     const Point3i& p_obj = pixel_obj_center_pos_3d;
