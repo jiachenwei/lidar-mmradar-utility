@@ -15,15 +15,38 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+/**
+ * @brief 初始化画布
+ * @param src 引用类型用于存储画布
+ * @param real_x x轴向的画布总长度起点
+ * @param real_y y轴向的画布总长度
+ * @param real_origin 画布的起点
+ * @param pixels_per_meter 每米几个像素
+ * @return 画布绘制中心的像素坐标
+ *
+ */
 cv::Point2i initialize_display_canvas(cv::Mat& src, const double& real_x,
                                       const double& real_y,
                                       const double& real_origin_x,
                                       const double& real_origin_y,
                                       const int& pixels_per_meter);
 
+/**
+ * @brief 绘制一个毫米波雷达目标
+ * @param src 绘制画布的引用
+ * @param real_pos 目标的真实位置(x, y)，单位m
+ * @param real_speed 目标的真实速度(x, y)，单位m/s
+ * @param obj_color 目标的绘制颜色
+ * @param pixel_drawing_origin 绘制的起点
+ * @param pixels_per_meter 每米几个像素
+ * @param predict_sec 预测时间
+ * @param zoom 毫米波雷达目标的缩放
+ * @return 毫米波雷达在画布中的像素坐标
+ *
+ */
 cv::Point2i draw_one_mmradar_object(
-    cv::Mat* const src, const cv::Point2d& real_obj_pos,
-    const cv::Point2d& real_speed, const cv::Scalar& obj_color,
+    cv::Mat* const src, const cv::Point2d real_pos,
+    const cv::Point2d real_speed, const cv::Scalar& obj_color,
     const cv::Point2i& pixel_drawing_origin, const int& pixels_per_meter,
     const double& predict_sec = 0.05, const double& zoom = 0.45);
 

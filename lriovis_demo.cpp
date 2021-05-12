@@ -43,43 +43,37 @@ int main() {
 
     Scalar robj_color(1, 0.5, 1);
 
-    draw_one_mmradar_object(&src, Point2d(-6, 16), Point2d(2, 2),
-                            robj_color / 7, pixel_drawing_origin,
-                            pixels_per_meter);
-    draw_one_mmradar_object(&src, Point2d(-4, 16), Point2d(4, 4),
-                            robj_color / 7 * 2, pixel_drawing_origin,
-                            pixels_per_meter);
-    draw_one_mmradar_object(&src, Point2d(-2, 16), Point2d(6, 6),
-                            robj_color / 7 * 3, pixel_drawing_origin,
-                            pixels_per_meter);
-    draw_one_mmradar_object(&src, Point2d(0, 16), Point2d(8, 8),
-                            robj_color / 7 * 4, pixel_drawing_origin,
-                            pixels_per_meter);
-    draw_one_mmradar_object(&src, Point2d(2, 16), Point2d(10, 10),
-                            robj_color / 7 * 5, pixel_drawing_origin,
-                            pixels_per_meter);
-    draw_one_mmradar_object(&src, Point2d(4, 16), Point2d(12, 12),
-                            robj_color / 7 * 6, pixel_drawing_origin,
-                            pixels_per_meter);
-    draw_one_mmradar_object(&src, Point2d(6, 16), Point2d(14, 14), robj_color,
+    draw_one_mmradar_object(&src, {-6, 16}, {2, 2}, robj_color / 7,
+                            pixel_drawing_origin, pixels_per_meter);
+    draw_one_mmradar_object(&src, {-4, 16}, {4, 4}, robj_color / 7 * 2,
+                            pixel_drawing_origin, pixels_per_meter);
+    draw_one_mmradar_object(&src, {-2, 16}, {6, 6}, robj_color / 7 * 3,
+                            pixel_drawing_origin, pixels_per_meter);
+    draw_one_mmradar_object(&src, {0, 16}, {8, 8}, robj_color / 7 * 4,
+                            pixel_drawing_origin, pixels_per_meter);
+    draw_one_mmradar_object(&src, {2, 16}, {10, 10}, robj_color / 7 * 5,
+                            pixel_drawing_origin, pixels_per_meter);
+    draw_one_mmradar_object(&src, {4, 16}, {12, 12}, robj_color / 7 * 6,
+                            pixel_drawing_origin, pixels_per_meter);
+    draw_one_mmradar_object(&src, {6, 16}, {14, 14}, robj_color,
                             pixel_drawing_origin, pixels_per_meter);
 
-    draw_one_mmradar_object(&src, Point2d(-6, 32), Point2d(-20, 2), robj_color,
+    draw_one_mmradar_object(&src, {-6, 32}, {-20, 2}, robj_color,
                             pixel_drawing_origin, pixels_per_meter);
-    draw_one_mmradar_object(&src, Point2d(-8, 44), Point2d(0, 0), robj_color,
+    draw_one_mmradar_object(&src, {-8, 44}, {0, 0}, robj_color,
                             pixel_drawing_origin, pixels_per_meter);
 
     Point2i p1 =
-        draw_one_mmradar_object(&src, Point2d(3, 22), Point2d(0, 0), robj_color,
+        draw_one_mmradar_object(&src, {3, 22}, {0, 0}, robj_color,
                                 pixel_drawing_origin, pixels_per_meter);
     draw_text_block(
         &src,
         vector<string>({"mm_radar_obj", "x=3, y=22", "vx=0, vy=0", "prob=7"}),
         p1, 0.5, 3, Scalar(1, 1, 1), Scalar(0.35, 0.35, 0.35));
 
-    Point2i p2 = draw_one_mmradar_object(
-        &src, Point2d(-2, 43), Point2d(10, -10), robj_color / 7 * 5,
-        pixel_drawing_origin, pixels_per_meter);
+    Point2i p2 =
+        draw_one_mmradar_object(&src, {-2, 43}, {10, -10}, robj_color / 7 * 5,
+                                pixel_drawing_origin, pixels_per_meter);
     draw_text_block(&src,
                     vector<string>({"mm_radar_obj", "x=-2, y=43",
                                     "vx=10, vy=-10", "prob=5"}),

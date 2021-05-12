@@ -18,17 +18,6 @@ Point2i initialize_display_canvas(Mat& src, const double& real_x,
                                   const double& real_origin_x,
                                   const double& real_origin_y,
                                   const int& pixels_per_meter) {
-    /**
-     * @brief 初始化画布
-     * @param src 引用类型用于存储画布
-     * @param real_x x轴向的画布总长度起点
-     * @param real_y y轴向的画布总长度
-     * @param real_origin 画布的起点
-     * @param pixels_per_meter 每米几个像素
-     * @return 画布绘制中心的像素坐标
-     *
-     */
-
     const Point2i _real_origin(real_origin_x, real_origin_y);
     // 画布宽度，单位：像素
     const int pixel_canvas_width = std::round(real_x * pixels_per_meter);
@@ -108,14 +97,14 @@ Point2i initialize_display_canvas(Mat& src, const double& real_x,
     return pixel_drawing_origin;
 }
 
-Point2i draw_one_mmradar_object(Mat* const src, const Point2d& real_obj_pos,
-                                const Point2d& real_speed,
+Point2i draw_one_mmradar_object(Mat* const src, const Point2d real_pos,
+                                const Point2d real_speed,
                                 const Scalar& obj_color,
                                 const Point2i& pixel_drawing_origin,
                                 const int& pixels_per_meter,
                                 const double& predict_sec, const double& zoom) {
-    Point2i pixel_obj_point(std::round(real_obj_pos.x * pixels_per_meter),
-                            -std::round(real_obj_pos.y * pixels_per_meter));
+    Point2i pixel_obj_point(std::round(real_pos.x * pixels_per_meter),
+                            -std::round(real_pos.y * pixels_per_meter));
 
     circle(*src, pixel_drawing_origin + pixel_obj_point,
            std::round(pixels_per_meter * zoom), obj_color, 1);
@@ -313,6 +302,10 @@ void draw_text_block(cv::Mat* const img, const std::vector<std::string>& texts,
                      const cv::Scalar& font_color, const cv::Scalar& bg_color,
                      const cv::Point2i& pixel_offset, const float& transparent,
                      const int& pixel_padding, const bool& right_bottom) {
+    /**
+     * @brief
+     *
+     */
     Size2i total_size(0, 0);
     int baseline = 0;
     for (int i = 0; i < texts.size(); i++) {
