@@ -1,3 +1,11 @@
+/**
+ * @file lriovis_demo.cpp
+ * @brief
+ * @author Chenwei Jia (cwjia98@gmail.com)
+ * @version 1.0
+ * @date 2021-05-14
+ */
+
 #include <iostream>
 
 #include "visualization/lriovis.hpp"

@@ -1,18 +1,25 @@
 /**
  * @file lriovis.cpp
- * @author Chenwei Jia (cwjia98@gmail.com)
  * @brief
- * @version 0.1
- * @date 2021-05-08
- *
- * @copyright Copyright (c) 2021
- *
+ * @author Chenwei Jia (cwjia98@gmail.com)
+ * @version 1.0
+ * @date 2021-05-14
  */
 
 #include "lriovis.hpp"
 
 using namespace cv;
 
+/**
+ * @brief 初始化画布
+ * @param src              引用类型用于存储画布
+ * @param real_x           x轴向的画布总长度起点
+ * @param real_y           y轴向的画布总长度
+ * @param real_origin      画布的起点
+ * @param pixels_per_meter 每米几个像素
+ * @return cv::Point2i 画布绘制中心的像素坐标
+ *
+ */
 Point2i initialize_display_canvas(Mat& src, const double& real_x,
                                   const double& real_y,
                                   const double& real_origin_x,
@@ -97,6 +104,19 @@ Point2i initialize_display_canvas(Mat& src, const double& real_x,
     return pixel_drawing_origin;
 }
 
+/**
+ * @brief 绘制一个毫米波雷达目标
+ * @param src              绘制画布的指针
+ * @param real_pos         目标的真实位置(x, y)，单位m
+ * @param real_speed       目标的真实速度(x, y)，单位m/s
+ * @param obj_color        目标的绘制颜色
+ * @param pixel_drawing_origin 绘制的起点
+ * @param pixels_per_meter 每米几个像素
+ * @param predict_sec      预测时间
+ * @param zoom             毫米波雷达目标的缩放
+ * @return cv::Point2i 毫米波雷达在画布中的像素坐标
+ *
+ */
 Point2i draw_one_mmradar_object(Mat* const src, const Point2d real_pos,
                                 const Point2d real_speed,
                                 const Scalar& obj_color,
@@ -130,6 +150,14 @@ Point2i draw_one_mmradar_object(Mat* const src, const Point2d real_pos,
     return pixel_drawing_origin + pixel_obj_point;
 }
 
+/**
+ * @brief 四元数转旋转矩阵
+ * @param  w                w
+ * @param  x                x
+ * @param  y                y
+ * @param  z                z
+ * @return Eigen::Matrix3d 旋转矩阵
+ */
 Eigen::Matrix3d quat_to_rot_mat(const double& w, const double& x,
                                 const double& y, const double& z) {
     Eigen::Quaterniond q;
@@ -140,6 +168,11 @@ Eigen::Matrix3d quat_to_rot_mat(const double& w, const double& x,
     return q.normalized().toRotationMatrix();
 }
 
+/**
+ * @brief 四元数转旋转矩阵
+ * @param  quat             cv::Scalar 类封装的四元数{w,x,y,z}
+ * @return Eigen::Matrix3d 旋转矩阵
+ */
 Eigen::Matrix3d quat_to_rot_mat(const Scalar& quat) {
     Eigen::Quaterniond q;
     q.w() = quat[0];
@@ -149,6 +182,12 @@ Eigen::Matrix3d quat_to_rot_mat(const Scalar& quat) {
     return q.normalized().toRotationMatrix();
 }
 
+/**
+ * @brief
+ * 旋转矩阵叉乘坐标，如果目标绕远点旋转则目标不需要修正，如果目标绕的不是原点旋转，则目标的坐标需要减旋转点的坐标作出修正。
+ * @param  rot_mat          旋转矩阵
+ * @param  p 目标点的坐标。
+ */
 void rot_mat_mul_point(const Eigen::Matrix3d& rot_mat, Point3d& p) {
     Eigen::Vector3d pos(p.x, p.y, p.z);
     pos = rot_mat * pos;
@@ -157,6 +196,34 @@ void rot_mat_mul_point(const Eigen::Matrix3d& rot_mat, Point3d& p) {
     p.z = pos.z();
 }
 
+/**
+ * @brief 旋转矩阵叉乘坐标
+ * @param  rot_mat          旋转矩阵
+ * @param  p                目标点
+ * @param  o                目标点所绕的旋转点
+ */
+void rot_mat_mul_poin_2(const Eigen::Matrix3d& rot_mat, Point3d& p,
+                        const Point3d& o) {
+    Eigen::Vector3d pos((p.x - o.x), (p.y - o.y), (p.z - o.z));
+    pos = rot_mat * pos;
+    p.x = pos.x() + o.x;
+    p.y = pos.y() + o.y;
+    p.z = pos.z() + o.z;
+}
+
+/**
+ * @brief 绘制一个激光雷达包围框
+ * @param  src              绘制画布的指针
+ * @param  real_obj_center_pos 包围框中心的真实坐标
+ * @param  real_obj_size    包围框的真实尺寸
+ * @param  quat             包围框的旋转四元数
+ * @param  pixel_drawing_origin 绘制画布的像素中心
+ * @param  pixels_per_meter 每米几个像素
+ * @param  min_real_z       需要显示的最小高度
+ * @param  max_real_z       需要显示的最大高度
+ * @param  color            包围框的颜色
+ * @return cv::Point2i 激光雷达包围框的像素坐标
+ */
 Point2i draw_one_lidar_objects_bounding_box(
     Mat* const src, const Point3d& real_obj_center_pos,
     const Point3d& real_obj_size, const Scalar& quat,
@@ -266,6 +333,15 @@ Point2i draw_one_lidar_objects_bounding_box(
     return Point2i(pixel_obj_center_pos_3d.x, pixel_obj_center_pos_3d.y);
 }
 
+/**
+ * @brief 绘制一帧点云
+ * @param  src              绘制画布的指针
+ * @param  real_obj_pos_3d  真实坐标的点云
+ * @param  max_real_z       最大显示的高度
+ * @param  pixels_per_meter 每米几个像素
+ * @param  pixel_drawing_origin 绘制画布的像素中心
+ * @param  point_color      绘制点云的颜色
+ */
 void draw_one_frame_of_lidar_point_cloud(
     Mat* const src, const std::vector<Point3d>& real_obj_pos_3d,
     const double& max_real_z, const int& pixels_per_meter,
@@ -283,6 +359,13 @@ void draw_one_frame_of_lidar_point_cloud(
     }
 }
 
+/**
+ * @brief 图像透明相加
+ * @param  dst              目标图像
+ * @param  img              需要放置的图像
+ * @param  pos              需要放置的位置
+ * @param  transparent      img的透明度
+ */
 void add_transparent(cv::Mat& dst, cv::Mat& img, const Point2i& pos,
                      const double& transparent) {
     for (int i = 0; i < img.rows && i + pos.y < dst.rows; i++) {
@@ -296,7 +379,21 @@ void add_transparent(cv::Mat& dst, cv::Mat& img, const Point2i& pos,
     }
 }
 
-void draw_text_block(cv::Mat* const img, const std::vector<std::string>& texts,
+/**
+ * @brief 绘制文本块
+ * @param  src              绘制画布的指针
+ * @param  text             需要绘制的文本，没一行需要单独加入vector中
+ * @param  pixel_block_pos  绘制文本块的左上角位置
+ * @param  font_size        字体大小
+ * @param  pixel_line_spacing 行间距
+ * @param  font_color       字体颜色
+ * @param  bg_color         背景颜色
+ * @param  pixel_offset     位置偏移
+ * @param  transparent      文本块的透明度
+ * @param  pixel_padding    文本的页边距
+ * @param  right_bottom     如果置为true，则文本框位置变为右下角位置
+ */
+void draw_text_block(cv::Mat* const src, const std::vector<std::string>& texts,
                      const cv::Point2i& pixel_block_pos,
                      const double& font_scale, const int& pixel_line_spacing,
                      const cv::Scalar& font_color, const cv::Scalar& bg_color,
@@ -322,7 +419,7 @@ void draw_text_block(cv::Mat* const img, const std::vector<std::string>& texts,
     total_size.width += pixel_padding * 2;
     total_size.height += pixel_padding * 2;
 
-    Mat text_block = Mat::zeros(total_size, img->type());
+    Mat text_block = Mat::zeros(total_size, src->type());
     rectangle(text_block, Point2i(0, 0),
               Point2i(total_size.width, total_size.height), bg_color, -1);
 
@@ -339,16 +436,16 @@ void draw_text_block(cv::Mat* const img, const std::vector<std::string>& texts,
     }
 
     if (right_bottom == false) {
-        add_transparent(*img, text_block, pixel_offset + pixel_block_pos,
+        add_transparent(*src, text_block, pixel_offset + pixel_block_pos,
                         transparent);
-        circle(*img, pixel_block_pos + pixel_offset, 3, font_color, -1);
+        circle(*src, pixel_block_pos + pixel_offset, 3, font_color, -1);
     }
 
     if (right_bottom == true) {
-        add_transparent(*img, text_block,
+        add_transparent(*src, text_block,
                         pixel_block_pos - pixel_offset -
                             Point2i(total_size.width, total_size.height),
                         transparent);
-        circle(*img, pixel_block_pos - pixel_offset, 3, font_color, -1);
+        circle(*src, pixel_block_pos - pixel_offset, 3, font_color, -1);
     }
 }
